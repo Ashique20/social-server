@@ -1,6 +1,6 @@
 const express = require('express');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const cors = require('cors');
 const app = express();
@@ -32,11 +32,18 @@ async function run() {
     const mediaCollection = client.db('media').collection('mediaCollection');
     const aboutCollection = client.db('media').collection('aboutCollection');
     const commentCollection = client.db('media').collection('commentCollection');
+   
 
 
 
 
     app.get('/comment/:id', async (req, res) => {
+      const query = {postId:req.params.id};
+      const cursor = commentCollection.find(query);
+      const comments = await cursor.toArray();
+      res.send(comments)
+    })
+    app.put('/comment/:id', async (req, res) => {
       const query = {postId:req.params.id};
       const cursor = commentCollection.find(query);
       const comments = await cursor.toArray();
@@ -48,6 +55,7 @@ async function run() {
       const result = await commentCollection.insertOne(comment)
       res.send(result)
     })
+ 
 
     app.get('/media', async (req, res) => {
       const query = {};
@@ -55,6 +63,14 @@ async function run() {
       const medias = await cursor.toArray();
       res.send(medias)
     })
+
+    app.get('/media/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const media = await mediaCollection.findOne(query);
+      res.send(media)
+    })
+
 
     app.post('/media',async(req,res)=>{
       const media = req.body;
